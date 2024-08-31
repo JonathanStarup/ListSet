@@ -425,11 +425,13 @@ mod ListSet {
 
 mod UnorderedList {
 
+    /// TODO: docs
     pub def append(l1: List[t], l2: List[t]): List[t] = match l1 {
         case hd :: tl => append(tl, hd :: l2)
         case Nil => l2
     }
 
+    /// TODO: docs
     pub def removeOpt(x: t, l: List[t]): Option[List[t]] with Eq[t] =
         removeOptHelper(x, Nil, l)
 
@@ -440,6 +442,7 @@ mod UnorderedList {
         case Nil => None
     }
 
+    /// TODO: docs
     pub def partition(f: t -> Bool, l: List[t]): (List[t], List[t]) =
         partitionHelper(f, Nil, Nil, l)
 
@@ -450,6 +453,7 @@ mod UnorderedList {
         case Nil => (accTrue, accFalse)
     }
 
+    /// TODO: docs
     pub def filter(f: t -> Bool, l: List[t]): List[t] with Eq[t] =
         filterHelper(f, Nil, l)
 
@@ -464,12 +468,14 @@ mod UnorderedList {
 
 mod ListOps {
 
+    /// TODO: docs
     pub def sizeLessThan(l1: List[t], l2: List[t]): Bool = match (l1, l2) {
         case (_ :: tl1, _ :: tl2) => sizeLessThan(tl1, tl2)
         case (Nil, _ :: _) => true
         case (_, Nil) => false
     }
 
+    /// TODO: docs
     pub def sizeEq(l1: List[t], l2: List[t]): Bool = match (l1, l2) {
         case (_ :: next1, _ :: next2) => sizeEq(next1, next2)
         case (Nil, Nil) => true
