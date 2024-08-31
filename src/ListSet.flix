@@ -228,6 +228,58 @@ mod ListSet {
         s |> extract |> listFilterMap(f) |> ListSet
 
     def listFilterMap(f: t -> Option[tt], l: List[t]): List[tt] with Eq[t], Eq[tt] =
-        l |> List.filterMap(f) |> List.foldLeft(acc -> elm -> listInsert(elm, acc), Nil)
+        l |>
+            List.filterMap(f) |>
+            List.foldLeft(acc -> elm -> listInsert(elm, acc), Nil)
+
+    ///
+    /// Returns a set containing the elements of all the sets in `s`.
+    ///
+    /// This is a quadratic time operation.
+    ///
+    pub def flatten(s: ListSet[ListSet[t]]): ListSet[t] with Eq[t] =
+        (ListSet.empty(), extract(s)) ||> List.foldLeft(union)
+
+    ///
+    /// Returns the combination of all elements in `s`, as defined by the
+    /// `Monoid` instance.
+    ///
+    /// This is a linear time operation.
+    ///
+    pub def fold(s: ListSet[t]): t with Monoid[t], Eq[t] =
+        (Monoid.empty(), extract(s)) ||> List.foldLeft(Monoid.combine)
+
+    ///
+    /// Returns the mapped combination of all elements in `s`, as defined by the
+    /// `Monoid` instance.
+    ///
+    /// This is a linear time operation.
+    ///
+    pub def foldMap(f: t -> tt, s: ListSet[t]): tt with Monoid[tt], Eq[t] =
+        (Monoid.empty(), extract(s)) ||> List.foldLeft(acc -> f >> Monoid.combine(acc))
+
+    /// Returns `true` if `f` returns true for all elements in `s`.
+    pub def forAll(f: t -> Bool, s: ListSet[t]): Bool with Eq[t] =
+        s |> extract |> List.forAll(f)
+
+    ///
+    /// Returns `true` if there are no elements in `s`.
+    ///
+    /// This is a constant time operation.
+    ///
+    pub def isEmpty(s: ListSet[t]): Bool with Eq[t] =
+        s |> extract |> List.isEmpty
+
+    ///
+    /// Returns `true` if `s2` contains all the elements of `s1` and at least
+    /// one element not in `s1`.
+    ///
+    /// This is a quadratic time operation.
+    ///
+    pub def isProperSubsetOf(s1: ListSet[t], s2: ListSet[t]): Bool with Eq[t] =
+        listIsProperSubsetOf(extract(s1), extract(s2))
+
+    def listIsProperSubsetOf(l1: List[t], l2: List[t]): Bool with Eq[t] =
+        l1 |> List.forAll(elm -> List.memberOf(elm, l2)) and ???
 
 }
