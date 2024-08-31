@@ -66,7 +66,6 @@ instance Collectable[ListSet[t]] with Eq[t] {
 /// The functions of ListSet all contain `Eq[t]` even though it is not required
 /// to be well-typed.
 ///
-///
 mod ListSet {
     use Eq.{eq, neq}
     use Foldable.foldLeft
@@ -422,26 +421,13 @@ mod ListSet {
     pub def singleton(x: t): ListSet[t] with Eq[t] =
         ListSet(x :: Nil)
 
-    
-
 }
 
 mod UnorderedList {
+
     pub def append(l1: List[t], l2: List[t]): List[t] = match l1 {
         case hd :: tl => append(tl, hd :: l2)
         case Nil => l2
-    }
-
-    pub def filterMap(f: t -> Option[tt], l: List[t]): List[tt] =
-        filterMapHelper(f, Nil, l)
-
-
-    def filterMapHelper(f: t -> Option[tt], acc: List[tt], l: List[t]): List[tt] = match l {
-        case hd :: tl => match f(hd) {
-            case Some(v) => filterMapHelper(f, v :: acc, tl)
-            case None => filterMapHelper(f, acc, tl)
-        }
-        case Nil => acc
     }
 
     pub def removeOpt(x: t, l: List[t]): Option[List[t]] with Eq[t] =
@@ -452,24 +438,6 @@ mod UnorderedList {
             if (hd == x) Some(append(acc, tl))
             else removeOptHelper(x, hd :: acc, tl)
         case Nil => None
-    }
-
-    pub def map(f: t -> tt, l: List[t]): List[tt] =
-        mapHelper(f, Nil, l)
-
-    def mapHelper(f: t -> tt, acc: List[tt], l: List[t]): List[tt] = match l {
-        case hd :: tl => mapHelper(f, f(hd) :: acc, tl)
-        case Nil => acc
-    }
-
-    pub def distinct(l: List[t]): List[t] with Eq[t] =
-        distinctHelper(Nil, l)
-
-    pub def distinctHelper(acc: List[t], l: List[t]): List[t] with Eq[t] = match l {
-        case hd :: tl =>
-            if (List.memberOf(hd, acc)) distinctHelper(acc, tl)
-            else distinctHelper(hd :: acc, tl)
-        case Nil => acc
     }
 
     pub def partition(f: t -> Bool, l: List[t]): (List[t], List[t]) =
@@ -491,6 +459,7 @@ mod UnorderedList {
             else filterHelper(f, acc, tl)
         case Nil => acc
     }
+
 }
 
 mod ListOps {
