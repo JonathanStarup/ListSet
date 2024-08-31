@@ -3,6 +3,11 @@ mod JonathanStarup {
 // -- INVARIANT --
 // The list of ListSet never contain duplicates at any point.
 //
+// -- OPTIMIZATION --
+// - A: Exploit the unordered nature of the inner list (`UnorderedList`)
+// - B: Other things being equal, maintain invariants while traversing to minimize
+//   peak memory usage
+//
 
 ///
 /// A linear representation of a set, requiring only `Eq[t]`.
@@ -67,11 +72,6 @@ mod ListSet {
     use Foldable.foldLeft
     use JonathanStarup.{UnorderedList => UList}
     use JonathanStarup.ListOps
-
-    //
-    // TODO OPTIMIZATION: exploit that list order doesn't matter, e.g.
-    // accumulator can just cons without reverse
-    //
 
     /// Returns the list of `s`.
     def extract(s: ListSet[t]): List[t] = {
@@ -241,8 +241,16 @@ mod ListSet {
     pub def filterMap(f: t -> Option[tt], s: ListSet[t]): ListSet[tt] with Eq[t], Eq[tt] =
         s |> extract |> listFilterMap(f) |> ListSet
 
-    def listFilterMap(f: t -> Option[tt], l: List[t]): List[tt] with Eq[t], Eq[tt] =
-        l |> UList.filterMap(f) |> UList.distinct
+    def listFilterMap(f: t -> Option[tt], l: List[t]): List[tt] with Eq[tt] =
+        listFilterMapHelper(f, Nil, l)
+
+    def listFilterMapHelper(f: t -> Option[tt], acc: List[tt], l: List[t]): List[tt] with Eq[tt] = match l {
+        case hd :: tl => match f(hd) {
+            case Some(v) => listFilterMapHelper(f, listInsert(v, acc), tl)
+            case None => listFilterMapHelper(f, acc, tl)
+        }
+        case Nil => acc
+    }
 
     ///
     /// Returns a set containing the elements of all the sets in `s`.
@@ -311,7 +319,12 @@ mod ListSet {
         s |> extract |> listMap(f) |> ListSet
 
     def listMap(f: t -> tt, l: List[t]): List[tt] with Eq[tt] =
-        l |> UList.map(f) |> UList.distinct
+        listMapHelper(f, Nil, l)
+
+    def listMapHelper(f: t -> tt, acc: List[tt], l: List[t]): List[tt] with Eq[tt] = match l {
+        case hd :: tl => listMapHelper(f, listInsert(f(hd), acc), tl)
+        case Nil => acc
+    }
 
     ///
     /// Returns the largest element in `s`, defined by `cmp`.
@@ -355,13 +368,61 @@ mod ListSet {
     /// This is a linear time operation.
     ///
     pub def replace(src: {src = t}, dst: {dst = t}, s: ListSet[t]): ListSet[t] with Eq[t] =
-        s |> extract |> listSetReplace(src, dst) |> ListSet
+        s |> extract |> listReplace(src, dst) |> ListSet
 
-    pub def listSetReplace(src: {src = t}, dst: {dst = t}, l: List[t]): List[t] with Eq[t] =
+    def listReplace(src: {src = t}, dst: {dst = t}, l: List[t]): List[t] with Eq[t] =
         match UList.removeOpt(src#src, l) {
             case Some(removed) => listInsert(dst#dst, removed)
             case None => l
         }
+
+    ///
+    /// Returns a set build by repeatedly applying `f` to `state` until it
+    /// returns `None`. Each `Some` gives the next state and a new element to
+    /// add to the set.
+    ///
+    /// This is a quadratic time operation.
+    ///
+    pub def unfold(f: state -> Option[(t, state)] \ ef, state: state): ListSet[t] \ ef with Eq[t] =
+        listUnfold(f, Nil, state) |> ListSet
+
+    def listUnfold(f: state -> Option[(t, state)] \ ef, acc: List[t], state0: state): List[t] \ ef with Eq[t] =
+        match f(state0) {
+            case Some(v, state1) => listUnfold(f, listInsert(v, acc), state1)
+            case None => acc
+        }
+
+    ///
+    /// Returns a set build by repeatedly applying `f` until it returns `None`.
+    /// Each `Some` adds a new element to the set.
+    ///
+    /// This is a quadratic time operation.
+    ///
+    pub def unfoldWithIter(f: Unit -> Option[t] \ ef): ListSet[t] \ ef with Eq[t] =
+        listUnfoldWithIter(f, Nil) |> ListSet
+
+    def listUnfoldWithIter(f: Unit -> Option[t] \ ef, acc: List[t]): List[t] \ ef with Eq[t] =
+        match f() {
+            case Some(v) => listUnfoldWithIter(f, listInsert(v, acc))
+            case None => acc
+        }
+
+    /// TODO: docs
+    pub def sumWith(f: t -> Int32, s: ListSet[t]): Int32 with Eq[t] =
+        s |> extract |> List.sumWith(f)
+
+    /// TODO: docs
+    pub def subsets(s: ListSet[t]): ListSet[ListSet[t]] with Eq[t] =
+        s |> extract |> listSubsets |> List.map(ListSet) |> ListSet
+
+    def listSubsets(l: List[t]): List[List[t]] with Eq[t] =
+        (Nil :: Nil, l) ||> List.foldLeft(acc -> elm -> listUnion(acc |> List.map(listInsert(elm)), acc))
+
+    /// TODO: docs
+    pub def singleton(x: t): ListSet[t] with Eq[t] =
+        ListSet(x :: Nil)
+
+    
 
 }
 
