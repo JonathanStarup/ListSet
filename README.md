@@ -6,10 +6,20 @@
 standard library without requiring `Order` or `Hash`. This set inefficient but
 might be useful for small sets.
 
+# Package Structure
+- `JonathanStarup.ListSet`
+    - The main module of this package, defining the list-based set.
+- `JonathanStarup.ListOps`
+    - Because of limited function hiding in Flix, here are some functions that
+      operate on plain lists not in the standard library.
+- `JonathanStarup.UnorderedList`
+    - Because of limited function hiding in Flix, here are some functions that
+      operate on lists without respecting the order of the list.
+
 # License
 See [LICENSE.md](./LICENSE.md).
 
-
+## Copyright
 Copyright 2024 Jonathan Lindegaard Starup
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
