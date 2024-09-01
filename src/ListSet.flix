@@ -42,7 +42,7 @@ mod JonathanStarup {
 /// inner order of the elements in the set. `toString` is the one exception, but
 /// the output of that should not be relied on.
 ///
-enum ListSet[t](List[t])
+pub enum ListSet[t](List[t])
 
 instance Eq[ListSet[t]] with Eq[t] {
     pub def eq(x: ListSet[t], y: ListSet[t]): Bool =
