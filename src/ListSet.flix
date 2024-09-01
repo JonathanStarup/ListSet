@@ -406,18 +406,30 @@ mod ListSet {
             case None => acc
         }
 
-    /// TODO: docs
+    ///
+    /// Returns the sum of the value of the elements of `s`, according to `f`.
+    ///
+    /// This is a linear time operation.
+    ///
     pub def sumWith(f: t -> Int32, s: ListSet[t]): Int32 with Eq[t] =
         s |> extract |> List.sumWith(f)
 
-    /// TODO: docs
+    ///
+    /// Returns a set of all subsets of `s`, including `empty()` and `s`.
+    ///
+    /// This is an exponential time operation.
+    ///
     pub def subsets(s: ListSet[t]): ListSet[ListSet[t]] with Eq[t] =
         s |> extract |> listSubsets |> List.map(ListSet) |> ListSet
 
     def listSubsets(l: List[t]): List[List[t]] with Eq[t] =
         (Nil :: Nil, l) ||> List.foldLeft(acc -> elm -> listUnion(acc |> List.map(listInsert(elm)), acc))
 
-    /// TODO: docs
+    ///
+    /// Returns the set with the single element `x`.
+    ///
+    /// This is a constant time operation.
+    ///
     pub def singleton(x: t): ListSet[t] with Eq[t] =
         ListSet(x :: Nil)
 
@@ -425,13 +437,16 @@ mod ListSet {
 
 mod UnorderedList {
 
-    /// TODO: docs
+    /// Returns a new list that contains the elements of both `l1` and `l2`.
     pub def append(l1: List[t], l2: List[t]): List[t] = match l1 {
         case hd :: tl => append(tl, hd :: l2)
         case Nil => l2
     }
 
-    /// TODO: docs
+    ///
+    /// Returns a new list where `x` is removed if it was present, otherwise
+    /// returns `None`.
+    ///
     pub def removeOpt(x: t, l: List[t]): Option[List[t]] with Eq[t] =
         removeOptHelper(x, Nil, l)
 
@@ -442,7 +457,10 @@ mod UnorderedList {
         case Nil => None
     }
 
-    /// TODO: docs
+    ///
+    /// Returns `(l1, l2)` where `l1` contains the elements of `l` where `f` is
+    /// `true`, `l2` contains the other elements.
+    ///
     pub def partition(f: t -> Bool, l: List[t]): (List[t], List[t]) =
         partitionHelper(f, Nil, Nil, l)
 
@@ -453,7 +471,7 @@ mod UnorderedList {
         case Nil => (accTrue, accFalse)
     }
 
-    /// TODO: docs
+    /// Returns the elements of `l` where `f` is true.
     pub def filter(f: t -> Bool, l: List[t]): List[t] with Eq[t] =
         filterHelper(f, Nil, l)
 
@@ -468,14 +486,22 @@ mod UnorderedList {
 
 mod ListOps {
 
-    /// TODO: docs
+    ///
+    /// Returns `true` if `l1` is strictly shorter than `l2`.
+    ///
+    /// Faster than `size(l1) < size(l2)`.
+    ///
     pub def sizeLessThan(l1: List[t], l2: List[t]): Bool = match (l1, l2) {
         case (_ :: tl1, _ :: tl2) => sizeLessThan(tl1, tl2)
         case (Nil, _ :: _) => true
         case (_, Nil) => false
     }
 
-    /// TODO: docs
+    ///
+    /// Returns `true` if `l1` and `l2` have the same length.
+    ///
+    /// Faster than `size(l1) == size(l2)`.
+    ///
     pub def sizeEq(l1: List[t], l2: List[t]): Bool = match (l1, l2) {
         case (_ :: next1, _ :: next2) => sizeEq(next1, next2)
         case (Nil, Nil) => true
