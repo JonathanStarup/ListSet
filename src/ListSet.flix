@@ -1,20 +1,30 @@
 mod JonathanStarup {
 //
 // -- INVARIANT --
-// The list of ListSet never contain duplicates at any point.
+// - A: The list inside ListSet never contain duplicates at any point.
 //
 // -- OPTIMIZATION --
 // - A: Exploit the unordered nature of the inner list (`UnorderedList`)
-// - B: Other things being equal, maintain invariants while traversing to minimize
-//   peak memory usage
+// - B: Other things being equal, maintain invariants while traversing to
+//   minimize peak memory usage
+//
+// -- STYLE --
+// - A: Max width 60 characters
+// - B: `{..}` around def bodies with `;`s
+// - C: If the function, `X`, code is non trivial, define `listX` with the same
+//      semantics, but operating on lists.
+// - D: Instance defs only forward to other functions.
+// - E: Pad multiline comments with empty doc-comment lines but otherwise never
+//      use padding.
+// - F: Always doc-commment the broad, non-polymorphic time complexity.
 //
 
 ///
 /// A linear representation of a set, requiring only `Eq[t]`.
 ///
-/// The set is very principled so no function is allowed to see the inner order
-/// of the elements in the set. `toString` is the one exception, but the output
-/// of that should not be relied on.
+/// The set is very principled so no function is allowed that could observe the
+/// inner order of the elements in the set. `toString` is the one exception, but
+/// the output of that should not be relied on.
 ///
 enum ListSet[t](List[t])
 
@@ -134,7 +144,9 @@ mod ListSet {
     ///
     /// This is a quadratic time operation.
     ///
-    pub def intersection(s1: ListSet[t], s2: ListSet[t]): ListSet[t] with Eq[t] =
+    pub def intersection(
+        s1: ListSet[t], s2: ListSet[t]
+    ): ListSet[t] with Eq[t] =
         listIntersection(extract(s1), extract(s2)) |> ListSet
 
     def listIntersection(l1: List[t], l2: List[t]): List[t] with Eq[t] =
@@ -181,24 +193,32 @@ mod ListSet {
     pub def size(s: ListSet[t]): Int32 with Eq[t] =
         s |> extract |> List.size
 
+    ///
     /// Returns a string representation of `s`.
-    pub def toString(s: ListSet[t]): String with ToString[t], Eq[t] = region rc {
+    ///
+    /// This is a linear time operation.
+    ///
+    pub def toString(s: ListSet[t]): String with ToString[t], Eq[t] = {
         use StringBuilder.appendString!;
-        let sb = StringBuilder.empty(rc);
-        appendString!("ListSet(", sb);
-        match extract(s) {
-            case hd :: tl =>
-                appendString!("${hd}", sb);
-                tl |> List.forEach(x -> appendString!(", ${x}", sb))
-            case Nil => ()
-        };
-        appendString!("}", sb);
-        StringBuilder.toString(sb)
+        region rc {
+            let sb = StringBuilder.empty(rc);
+            appendString!("ListSet(", sb);
+            match extract(s) {
+                case hd :: tl =>
+                    appendString!("${hd}", sb);
+                    tl |> List.forEach(x -> appendString!(", ${x}", sb))
+                case Nil => ()
+            };
+            appendString!("}", sb);
+            StringBuilder.toString(sb)
+        }
     }
 
     /// Returns a set of the elements of `iter`.
     pub def collect(iter: Iterator[t, ef, r]): ListSet[t] \ ef + r with Eq[t] =
-        (Nil, iter) ||> Iterator.foldLeft(s -> elm -> listInsert(elm, s)) |> ListSet
+        (Nil, iter) ||>
+            Iterator.foldLeft(s -> elm -> listInsert(elm, s)) |>
+            ListSet
 
     ///
     /// The optimized version of `size(s1) == size(s2)`.
@@ -237,13 +257,17 @@ mod ListSet {
     ///
     /// This is a quadratic time operation.
     ///
-    pub def filterMap(f: t -> Option[tt], s: ListSet[t]): ListSet[tt] with Eq[t], Eq[tt] =
+    pub def filterMap(
+        f: t -> Option[tt], s: ListSet[t]
+    ): ListSet[tt] with Eq[t], Eq[tt] =
         s |> extract |> listFilterMap(f) |> ListSet
 
     def listFilterMap(f: t -> Option[tt], l: List[t]): List[tt] with Eq[tt] =
         listFilterMapHelper(f, Nil, l)
 
-    def listFilterMapHelper(f: t -> Option[tt], acc: List[tt], l: List[t]): List[tt] with Eq[tt] = match l {
+    def listFilterMapHelper(
+        f: t -> Option[tt], acc: List[tt], l: List[t]
+    ): List[tt] with Eq[tt] = match l {
         case hd :: tl => match f(hd) {
             case Some(v) => listFilterMapHelper(f, listInsert(v, acc), tl)
             case None => listFilterMapHelper(f, acc, tl)
@@ -257,7 +281,9 @@ mod ListSet {
     /// This is a quadratic time operation.
     ///
     pub def flatten(s: ListSet[ListSet[t]]): ListSet[t] with Eq[t] =
-        (Nil, extract(s)) ||> List.foldLeft(acc -> extract >> listUnion(acc)) |> ListSet
+        (Nil, extract(s)) ||>
+            List.foldLeft(acc -> extract >> listUnion(acc)) |>
+            ListSet
 
     ///
     /// Returns the combination of all elements in `s`, as defined by the
@@ -275,7 +301,8 @@ mod ListSet {
     /// This is a linear time operation.
     ///
     pub def foldMap(f: t -> tt, s: ListSet[t]): tt with Monoid[tt], Eq[t] =
-        (Monoid.empty(), extract(s)) ||> List.foldLeft(acc -> f >> Monoid.combine(acc))
+        (Monoid.empty(), extract(s)) ||>
+            List.foldLeft(acc -> f >> Monoid.combine(acc))
 
     /// Returns `true` if `f` returns true for all elements in `s`.
     pub def forAll(f: t -> Bool, s: ListSet[t]): Bool with Eq[t] =
@@ -320,7 +347,9 @@ mod ListSet {
     def listMap(f: t -> tt, l: List[t]): List[tt] with Eq[tt] =
         listMapHelper(f, Nil, l)
 
-    def listMapHelper(f: t -> tt, acc: List[tt], l: List[t]): List[tt] with Eq[tt] = match l {
+    def listMapHelper(
+        f: t -> tt, acc: List[tt], l: List[t]
+    ): List[tt] with Eq[tt] = match l {
         case hd :: tl => listMapHelper(f, listInsert(f(hd), acc), tl)
         case Nil => acc
     }
@@ -330,7 +359,9 @@ mod ListSet {
     ///
     /// This is a linear time operation.
     ///
-    pub def maximumBy(cmp: t -> t -> Comparison, s: ListSet[t]): Option[t] with Eq[t] =
+    pub def maximumBy(
+        cmp: t -> t -> Comparison, s: ListSet[t]
+    ): Option[t] with Eq[t] =
         s |> extract |> List.maximumBy(cmp)
 
     ///
@@ -338,7 +369,9 @@ mod ListSet {
     ///
     /// This is a linear time operation.
     ///
-    pub def minimumBy(cmp: t -> t -> Comparison, s: ListSet[t]): Option[t] with Eq[t] =
+    pub def minimumBy(
+        cmp: t -> t -> Comparison, s: ListSet[t]
+    ): Option[t] with Eq[t] =
         s |> extract |> List.minimumBy(cmp)
 
     ///
@@ -347,8 +380,13 @@ mod ListSet {
     ///
     /// This is a linear time operation.
     ///
-    pub def partition(f: t -> Bool, s: ListSet[t]): (ListSet[t], ListSet[t]) with Eq[t] =
-        s |> extract |> UList.partition(f) |> (match (x, y) -> (ListSet(x), ListSet(y)))
+    pub def partition(
+        f: t -> Bool, s: ListSet[t]
+    ): (ListSet[t], ListSet[t]) with Eq[t] =
+        s |>
+            extract |>
+            UList.partition(f) |>
+            (match (x, y) -> (ListSet(x), ListSet(y)))
 
     ///
     /// Returns a set with the elements between `b` (inclusive) and `e`
@@ -366,10 +404,14 @@ mod ListSet {
     ///
     /// This is a linear time operation.
     ///
-    pub def replace(src: {src = t}, dst: {dst = t}, s: ListSet[t]): ListSet[t] with Eq[t] =
+    pub def replace(
+        src: {src = t}, dst: {dst = t}, s: ListSet[t]
+    ): ListSet[t] with Eq[t] =
         s |> extract |> listReplace(src, dst) |> ListSet
 
-    def listReplace(src: {src = t}, dst: {dst = t}, l: List[t]): List[t] with Eq[t] =
+    def listReplace(
+        src: {src = t}, dst: {dst = t}, l: List[t]
+    ): List[t] with Eq[t] =
         match UList.removeOpt(src#src, l) {
             case Some(removed) => listInsert(dst#dst, removed)
             case None => l
@@ -382,10 +424,14 @@ mod ListSet {
     ///
     /// This is a quadratic time operation.
     ///
-    pub def unfold(f: state -> Option[(t, state)] \ ef, state: state): ListSet[t] \ ef with Eq[t] =
+    pub def unfold(
+        f: state -> Option[(t, state)] \ ef, state: state
+    ): ListSet[t] \ ef with Eq[t] =
         listUnfold(f, Nil, state) |> ListSet
 
-    def listUnfold(f: state -> Option[(t, state)] \ ef, acc: List[t], state0: state): List[t] \ ef with Eq[t] =
+    def listUnfold(
+        f: state -> Option[(t, state)] \ ef, acc: List[t], state0: state
+    ): List[t] \ ef with Eq[t] =
         match f(state0) {
             case Some(v, state1) => listUnfold(f, listInsert(v, acc), state1)
             case None => acc
@@ -397,10 +443,14 @@ mod ListSet {
     ///
     /// This is a quadratic time operation.
     ///
-    pub def unfoldWithIter(f: Unit -> Option[t] \ ef): ListSet[t] \ ef with Eq[t] =
+    pub def unfoldWithIter(
+        f: Unit -> Option[t] \ ef
+    ): ListSet[t] \ ef with Eq[t] =
         listUnfoldWithIter(f, Nil) |> ListSet
 
-    def listUnfoldWithIter(f: Unit -> Option[t] \ ef, acc: List[t]): List[t] \ ef with Eq[t] =
+    def listUnfoldWithIter(
+        f: Unit -> Option[t] \ ef, acc: List[t]
+    ): List[t] \ ef with Eq[t] =
         match f() {
             case Some(v) => listUnfoldWithIter(f, listInsert(v, acc))
             case None => acc
@@ -423,7 +473,10 @@ mod ListSet {
         s |> extract |> listSubsets |> List.map(ListSet) |> ListSet
 
     def listSubsets(l: List[t]): List[List[t]] with Eq[t] =
-        (Nil :: Nil, l) ||> List.foldLeft(acc -> elm -> listUnion(acc |> List.map(listInsert(elm)), acc))
+        (Nil :: Nil, l) ||>
+            List.foldLeft(
+                acc -> elm -> listUnion(acc |> List.map(listInsert(elm)), acc)
+            )
 
     ///
     /// Returns the set with the single element `x`.
@@ -435,6 +488,10 @@ mod ListSet {
 
 }
 
+///
+/// A module for list operations that can be faster when you do not care about
+/// the order of the elements in the list.
+///
 mod UnorderedList {
 
     /// Returns a new list that contains the elements of both `l1` and `l2`.
@@ -450,12 +507,15 @@ mod UnorderedList {
     pub def removeOpt(x: t, l: List[t]): Option[List[t]] with Eq[t] =
         removeOptHelper(x, Nil, l)
 
-    def removeOptHelper(x: t, acc: List[t], l: List[t]): Option[List[t]] with Eq[t] = match l {
-        case hd :: tl =>
-            if (hd == x) Some(append(acc, tl))
-            else removeOptHelper(x, hd :: acc, tl)
-        case Nil => None
-    }
+    def removeOptHelper(
+        x: t, acc: List[t], l: List[t]
+    ): Option[List[t]] with Eq[t] =
+        match l {
+            case hd :: tl =>
+                if (hd == x) Some(append(acc, tl))
+                else removeOptHelper(x, hd :: acc, tl)
+            case Nil => None
+        }
 
     ///
     /// Returns `(l1, l2)` where `l1` contains the elements of `l` where `f` is
@@ -464,26 +524,36 @@ mod UnorderedList {
     pub def partition(f: t -> Bool, l: List[t]): (List[t], List[t]) =
         partitionHelper(f, Nil, Nil, l)
 
-    def partitionHelper(f: t -> Bool, accTrue: List[t], accFalse: List[t], l: List[t]): (List[t], List[t]) = match l {
-        case hd :: tl =>
-            if (f(hd)) partitionHelper(f, hd :: accTrue, accFalse, tl)
-            else partitionHelper(f, accTrue, hd :: accFalse, tl)
-        case Nil => (accTrue, accFalse)
-    }
+    def partitionHelper(
+        f: t -> Bool, accTrue: List[t], accFalse: List[t], l: List[t]
+    ): (List[t], List[t]) =
+        match l {
+            case hd :: tl =>
+                if (f(hd)) partitionHelper(f, hd :: accTrue, accFalse, tl)
+                else partitionHelper(f, accTrue, hd :: accFalse, tl)
+            case Nil => (accTrue, accFalse)
+        }
 
     /// Returns the elements of `l` where `f` is true.
     pub def filter(f: t -> Bool, l: List[t]): List[t] with Eq[t] =
         filterHelper(f, Nil, l)
 
-    def filterHelper(f: t -> Bool, acc: List[t], l: List[t]): List[t] with Eq[t] = match l {
-        case hd :: tl =>
-            if (f(hd)) filterHelper(f, hd :: acc, tl)
-            else filterHelper(f, acc, tl)
-        case Nil => acc
-    }
+    def filterHelper(
+        f: t -> Bool, acc: List[t], l: List[t]
+    ): List[t] with Eq[t] =
+        match l {
+            case hd :: tl =>
+                if (f(hd)) filterHelper(f, hd :: acc, tl)
+                else filterHelper(f, acc, tl)
+            case Nil => acc
+        }
 
 }
 
+///
+/// A module for List operations, sensible and usable outside of the `ListSet`
+/// context.
+///
 mod ListOps {
 
     ///
