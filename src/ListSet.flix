@@ -225,7 +225,7 @@ mod ListSet {
                     tl |> List.forEach(x -> appendString!(", ${x}", sb))
                 case Nil => ()
             };
-            appendString!("}", sb);
+            appendString!(")", sb);
             StringBuilder.toString(sb)
         }
     }
@@ -235,6 +235,22 @@ mod ListSet {
         (Nil, iter) ||>
             Iterator.foldLeft(s -> elm -> listInsert(elm, s)) |>
             ListSet
+
+    /// Returns a set of the elements in `iter`.
+    pub def fromIterable(iter: i): ListSet[elm] \ Iterable.Aef[i] with Iterable[i], Eq[elm] where Iterable.Elm[i] ~ elm =
+        region local {
+            iter |> Iterable.iterator(local) |> collect
+        }
+
+    ///
+    /// Returns the ordered set of the list set, based on the function `f`.
+    ///
+    /// This is a quadratic time operation.
+    ///
+    pub def toOrderedSet(f: t -> tt, s: ListSet[t]): Set[tt] with Eq[t], Order[tt] =
+        region local {
+            s |> extract |> List.iterator(local) |> Iterator.map(f) |> Collectable.collect
+        }
 
     ///
     /// The optimized version of `size(s1) == size(s2)`.
