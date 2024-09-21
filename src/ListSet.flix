@@ -317,25 +317,6 @@ mod ListSet {
             List.foldLeft(acc -> extract >> listUnion(acc)) |>
             ListSet
 
-    ///
-    /// Returns the combination of all elements in `s`, as defined by the
-    /// `Monoid` instance.
-    ///
-    /// This is a linear time operation.
-    ///
-    pub def fold(s: ListSet[t]): t with Monoid[t], Eq[t] =
-        (Monoid.empty(), extract(s)) ||> List.foldLeft(Monoid.combine)
-
-    ///
-    /// Returns the mapped combination of all elements in `s`, as defined by the
-    /// `Monoid` instance.
-    ///
-    /// This is a linear time operation.
-    ///
-    pub def foldMap(f: t -> tt, s: ListSet[t]): tt with Monoid[tt], Eq[t] =
-        (Monoid.empty(), extract(s)) ||>
-            List.foldLeft(acc -> f >> Monoid.combine(acc))
-
     /// Returns `true` if `f` returns true for all elements in `s`.
     pub def forAll(f: t -> Bool, s: ListSet[t]): Bool with Eq[t] =
         s |> extract |> List.forAll(f)

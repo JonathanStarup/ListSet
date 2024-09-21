@@ -1,4 +1,4 @@
-mod JonathanStarup.Test.ListSetGenerator {
+mod JonathanStarup.Test.Property.ListSetGenerator {
     use Collectable.collect
     use JonathanStarup.ListSet
     use Random.nextInt32

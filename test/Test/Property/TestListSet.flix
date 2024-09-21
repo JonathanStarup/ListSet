@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-mod JonathanStarup.Test.TestListSet {
+mod JonathanStarup.Test.Property.TestListSet {
     use JonathanStarup.ListSet
-    use JonathanStarup.Test.ListSetGenerator
+    use JonathanStarup.Test.Property.ListSetGenerator
     use Random.freshWithSeed
 
     eff Crash {
