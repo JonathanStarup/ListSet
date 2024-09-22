@@ -76,7 +76,10 @@ mod JonathanStarup.Test.Property.TestListSet {
     pub def testInsertRedundant(): Bool \ IO = {
         def prop(l) = {
             let s1 = ListSet.fromIterable(l);
-            let s2 = l |> List.head |> Option.map(hd -> ListSet.insert(hd, s1)) |> Option.getWithDefault(s1);
+            let s2 = l |>
+                List.head |>
+                Option.map(hd -> ListSet.insert(hd, s1)) |>
+                Option.getWithDefault(s1);
             assertExpect(expect = s1, s2)
         };
         prop |> runTest(1_000, -6859625i64)
