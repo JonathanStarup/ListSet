@@ -17,7 +17,6 @@
 mod JonathanStarup.Test.Property.TestListSet {
     use JonathanStarup.ListSet
     use JonathanStarup.Test.Property.ListSetGenerator
-    use Random.freshWithSeed
 
     eff Crash {
         pub def crash(msg: String): Void
@@ -45,9 +44,12 @@ mod JonathanStarup.Test.Property.TestListSet {
         tests: Int32, seed: Int64, prop: c -> Unit \ Crash
     ): Bool \ IO + Collectable.Aef[c]
     with Collectable[c] where Collectable.Elm[c] ~ Int32 = region local {
-        runCrash(() ->
-            ListSetGenerator.randomIterator(local, freshWithSeed(seed), tests) |>
-                Iterator.forEach(prop))
+        let f: Unit -> Unit \ local + Crash + Random + Collectable.Aef[c] = () ->
+            ListSetGenerator.randomIterator(local, tests) |>
+                Iterator.forEach(prop);
+        let g: Unit -> Bool \ local + IO + Random + Collectable.Aef[c] = () -> runCrash(f);
+        // manually compute the set difference
+        unchecked_cast((Random.runWithSeed(seed, g): _ \ (local + IO + Collectable.Aef[c]) - Random) as _ \ local + IO + Collectable.Aef[c])
     }
 
     @test
