@@ -22,34 +22,33 @@ mod JonathanStarup.Test.Property.TestListSet {
         pub def crash(msg: String): Void
     }
 
-    def runCrash(f: Unit -> Unit \ ef + Crash): Bool \ ef + IO =
-        checked_ecast (try {(f(): _ \ ef + Crash); true} with Crash {
+    def runCrash(f: Unit -> Unit \ ef): Bool \ ef + IO - Crash =
+        try {f(); true} with Crash {
             def crash(msg, _) = {
                 println("Test failed: ${msg}");
                 false
             }
-        })
+        }
 
     def _assertEq(x: t, y: t): Unit \ Crash with Eq[t], ToString[t] = {
         if (x == y) ()
-        else do Crash.crash("${x} != ${y}")
+        else Crash.crash("${x} != ${y}")
     }
 
     def assertExpect(expect: {expect = t}, actual: t): Unit \ Crash with Eq[t], ToString[t] = {
         if (expect#expect == actual) ()
-        else do Crash.crash("found ${actual} instead of ${expect#expect}")
+        else Crash.crash("found ${actual} but expected ${expect#expect}")
     }
 
     def runTest(
         tests: Int32, seed: Int64, prop: c -> Unit \ Crash
-    ): Bool \ IO + Collectable.Aef[c]
+    ): Bool \ IO + (Collectable.Aef[c] - Crash - Random)
     with Collectable[c] where Collectable.Elm[c] ~ Int32 = region local {
-        let f: Unit -> Unit \ local + Crash + Random + Collectable.Aef[c] = () ->
+        let f = () ->
             ListSetGenerator.randomIterator(local, tests) |>
                 Iterator.forEach(prop);
-        let g: Unit -> Bool \ local + IO + Random + Collectable.Aef[c] = () -> runCrash(f);
-        // manually compute the set difference
-        unchecked_cast((Random.runWithSeed(seed, g): _ \ (local + IO + Collectable.Aef[c]) - Random) as _ \ local + IO + Collectable.Aef[c])
+        let g = () -> runCrash(f);
+        Random.runWithSeed(seed, g)
     }
 
     @test
