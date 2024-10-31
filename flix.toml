@@ -1,6 +1,6 @@
 [package]
 name        = "ListSet"
 description = "A set that just requires equality."
-version     = "0.3.0"
-flix        = "0.51.0"
+version     = "0.4.0"
+flix        = "0.53.0"
 authors     = ["Jonathan Lindegaard Starup"]
