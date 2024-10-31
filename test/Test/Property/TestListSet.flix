@@ -17,32 +17,29 @@
 mod JonathanStarup.Test.Property.TestListSet {
     use JonathanStarup.ListSet
     use JonathanStarup.Test.Property.ListSetGenerator
+    use Abort.abort
 
-    eff Crash {
-        pub def crash(msg: String): Void
-    }
-
-    def runCrash(f: Unit -> Unit \ ef): Bool \ ef + IO - Crash =
-        try {f(); true} with Crash {
-            def crash(msg, _) = {
+    def runCrash(f: Unit -> Unit \ ef): Bool \ ef + IO - Abort =
+        try {f(); true} with Abort {
+            def abort(msg, _) = {
                 println("Test failed: ${msg}");
                 false
             }
         }
 
-    def _assertEq(x: t, y: t): Unit \ Crash with Eq[t], ToString[t] = {
+    def _assertEq(x: t, y: t): Unit \ Abort with Eq[t], ToString[t] = {
         if (x == y) ()
-        else Crash.crash("${x} != ${y}")
+        else abort("${x} != ${y}")
     }
 
-    def assertExpect(expect: {expect = t}, actual: t): Unit \ Crash with Eq[t], ToString[t] = {
+    def assertExpect(expect: {expect = t}, actual: t): Unit \ Abort with Eq[t], ToString[t] = {
         if (expect#expect == actual) ()
-        else Crash.crash("found ${actual} but expected ${expect#expect}")
+        else abort("found ${actual} but expected ${expect#expect}")
     }
 
     def runTest(
-        tests: Int32, seed: Int64, prop: c -> Unit \ Crash
-    ): Bool \ IO + (Collectable.Aef[c] - Crash - Random)
+        tests: Int32, seed: Int64, prop: c -> Unit \ Abort
+    ): Bool \ IO + (Collectable.Aef[c] - Abort - Random)
     with Collectable[c] where Collectable.Elm[c] ~ Int32 = region local {
         let f = () ->
             ListSetGenerator.randomIterator(local, tests) |>
