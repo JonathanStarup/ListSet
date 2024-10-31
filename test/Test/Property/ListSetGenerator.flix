@@ -17,7 +17,7 @@ mod JonathanStarup.Test.Property.ListSetGenerator {
             if (get(runningLength) <= 0) None
             else {
                 runningLength |> transform(Sub.sub(1));
-                Some(do Random.randomInt32())
+                Some(Random.randomInt32())
             }
         })
 
@@ -43,6 +43,7 @@ mod JonathanStarup.Test.Property.ListSetGenerator {
                 Some(fromLength(get(runningLen)))
             }
         });
+        // We cant use fromLength now, so we do it lazily.
         def consThing(k, it) = {
             let justK = Iterator.singleton(rc, () -> checked_ecast(fromLength(k))) |> Iterator.map(f -> f());
             Iterator.append(justK, it)
@@ -54,6 +55,6 @@ mod JonathanStarup.Test.Property.ListSetGenerator {
     }
 
     def nextNatWithMax(max: Int32): Int32 \ Random = {
-        Int32.modulo(do Random.randomInt32(), Int32.max(max, 1))
+        Int32.modulo(Random.randomInt32(), Int32.max(max, 1))
     }
 }
