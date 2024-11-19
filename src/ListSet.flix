@@ -215,17 +215,17 @@ mod ListSet {
     /// This is a linear time operation.
     ///
     pub def toString(s: ListSet[t]): String with ToString[t], Eq[t] = {
-        use StringBuilder.appendString!;
+        use StringBuilder.appendString;
         region rc {
             let sb = StringBuilder.empty(rc);
-            appendString!("ListSet(", sb);
+            appendString("ListSet(", sb);
             match extract(s) {
                 case hd :: tl =>
-                    appendString!("${hd}", sb);
-                    tl |> List.forEach(x -> appendString!(", ${x}", sb))
+                    appendString("${hd}", sb);
+                    tl |> List.forEach(x -> appendString(", ${x}", sb))
                 case Nil => ()
             };
-            appendString!(")", sb);
+            appendString(")", sb);
             StringBuilder.toString(sb)
         }
     }
