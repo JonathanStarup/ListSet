@@ -906,27 +906,27 @@ mod JonathanStarup.Test.TestListSet {
 
     @test
     def unfold01(): Bool =
-        ListSet.unfold(s -> if (true) None else Some(s + 48, s + 1), 0) == ListSet.empty()
+        ListSet.unfold(s -> if (true) None else Some((s + 48, s + 1)), 0) == ListSet.empty()
 
     @test
     def unfold02(): Bool =
-        ListSet.unfold(s -> if (s > 0) None else Some(s + 48, s + 1), 0) == ListSet.singleton(48)
+        ListSet.unfold(s -> if (s > 0) None else Some((s + 48, s + 1)), 0) == ListSet.singleton(48)
 
     @test
     def unfold03(): Bool =
-        ListSet.unfold(s -> if (s > 1) None else Some(s + 48, s + 1), 0) == ListSet.fromIterable(List#{48, 49})
+        ListSet.unfold(s -> if (s > 1) None else Some((s + 48, s + 1)), 0) == ListSet.fromIterable(List#{48, 49})
 
     @test
     def unfold04(): Bool =
-        ListSet.unfold(s -> if (s >= 10) None else Some(s + 48, s + 1), 0) == ListSet.fromIterable(List#{48, 49, 50, 51, 52, 53, 54, 55, 56, 57})
+        ListSet.unfold(s -> if (s >= 10) None else Some((s + 48, s + 1)), 0) == ListSet.fromIterable(List#{48, 49, 50, 51, 52, 53, 54, 55, 56, 57})
 
     @test
     def unfold05(): Bool =
-        ListSet.unfold(s -> if (s >= 10) None else Some(s + 48, s + 1), 5) == ListSet.fromIterable(List#{53, 54, 55, 56, 57})
+        ListSet.unfold(s -> if (s >= 10) None else Some((s + 48, s + 1)), 5) == ListSet.fromIterable(List#{53, 54, 55, 56, 57})
 
     @test
     def unfold06(): Bool =
-        ListSet.unfold(s -> if (s >= 10) None else Some(s + 48, s + 2), 0) == ListSet.fromIterable(List#{48, 50, 52, 54, 56})
+        ListSet.unfold(s -> if (s >= 10) None else Some((s + 48, s + 2)), 0) == ListSet.fromIterable(List#{48, 50, 52, 54, 56})
 
     /////////////////////////////////////////////////////////////////////////////
     // unfoldWithIter                                                          //

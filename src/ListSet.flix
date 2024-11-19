@@ -446,7 +446,7 @@ mod ListSet {
         f: state -> Option[(t, state)] \ ef, acc: List[t], state0: state
     ): List[t] \ ef with Eq[t] =
         match f(state0) {
-            case Some(v, state1) => listUnfold(f, listInsert(v, acc), state1)
+            case Some((v, state1)) => listUnfold(f, listInsert(v, acc), state1)
             case None => acc
         }
 
