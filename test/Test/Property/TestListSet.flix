@@ -39,7 +39,7 @@ mod JonathanStarup.Test.Property.TestListSet {
 
     def runTest(
         tests: Int32, seed: Int64, prop: c -> Unit \ Abort
-    ): Bool \ IO + (Collectable.Aef[c] - Abort - Random)
+    ): Bool \ IO + NonDet + (Collectable.Aef[c] - Abort - Random)
     with Collectable[c] where Collectable.Elm[c] ~ Int32 = region local {
         let f = () ->
             ListSetGenerator.randomIterator(local, tests) |>
@@ -49,7 +49,7 @@ mod JonathanStarup.Test.Property.TestListSet {
     }
 
     @test
-    pub def testEmpty(): Bool \ IO = {
+    pub def testEmpty(): Bool \ IO + NonDet = {
         def prop(l) = {
             let expectedLength = List.isEmpty(l);
             let s = ListSet.fromIterable(l);
@@ -59,7 +59,7 @@ mod JonathanStarup.Test.Property.TestListSet {
     }
 
     @test
-    pub def testSize(): Bool \ IO = {
+    pub def testSize(): Bool \ IO + NonDet = {
         def prop(l) = {
             let expectedLength = List.length(l);
             let s = ListSet.fromIterable(l);
@@ -69,7 +69,7 @@ mod JonathanStarup.Test.Property.TestListSet {
     }
 
     @test
-    pub def testInsertRedundant(): Bool \ IO = {
+    pub def testInsertRedundant(): Bool \ IO + NonDet = {
         def prop(l) = {
             let s1 = ListSet.fromIterable(l);
             let s2 = l |>
