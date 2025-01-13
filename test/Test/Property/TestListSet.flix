@@ -20,7 +20,7 @@ mod JonathanStarup.Test.Property.TestListSet {
     use Abort.abort
 
     def runCrash(f: Unit -> Unit \ ef): Bool \ ef + IO - Abort =
-        run {f(); true} with Abort {
+        run {f(); true} with handler Abort {
             def abort(msg, _) = {
                 println("Test failed: ${msg}");
                 false
