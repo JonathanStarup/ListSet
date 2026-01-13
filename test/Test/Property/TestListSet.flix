@@ -18,6 +18,7 @@ mod JonathanStarup.Test.Property.TestListSet {
     use JonathanStarup.ListSet
     use JonathanStarup.Test.Property.ListSetGenerator
     use Abort.abort
+    use Formattable.format
 
     def runCrash(f: Unit -> Unit \ ef): Bool \ ef + IO - Abort =
         run {f(); true} with handler Abort {
@@ -29,12 +30,12 @@ mod JonathanStarup.Test.Property.TestListSet {
 
     def _assertEq(x: t, y: t): Unit \ Abort with Eq[t], ToString[t] = {
         if (x == y) ()
-        else abort("${x} != ${y}")
+        else abort(format("${x} != ${y}"))
     }
 
     def assertExpect(expect: {expect = t}, actual: t): Unit \ Abort with Eq[t], ToString[t] = {
         if (expect#expect == actual) ()
-        else abort("found ${actual} but expected ${expect#expect}")
+        else abort(format("found ${actual} but expected ${expect#expect}"))
     }
 
     def runTest(
