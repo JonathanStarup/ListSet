@@ -20,64 +20,45 @@ mod JonathanStarup.Test.Property.TestListSet {
     use Abort.abort
     use Formattable.format
 
-    def runCrash(f: Unit -> Unit \ ef): Bool \ ef + IO - Abort =
-        run {f(); true} with handler Abort {
-            def abort(msg, _) = {
-                println("Test failed: ${msg}");
-                false
-            }
-        }
-
-    def _assertEq(x: t, y: t): Unit \ Abort with Eq[t], ToString[t] = {
-        if (x == y) ()
-        else abort(format("${x} != ${y}"))
-    }
-
-    def assertExpect(expect: {expect = t}, actual: t): Unit \ Abort with Eq[t], ToString[t] = {
-        if (expect#expect == actual) ()
-        else abort(format("found ${actual} but expected ${expect#expect}"))
-    }
-
     def runTest(
-        tests: Int32, seed: Int64, prop: c -> Unit \ Abort
-    ): Bool \ IO + (Collectable.Aef[c] - Abort - Random)
+        tests: Int32, seed: Int64, prop: c -> Unit \ Assert
+    ): Unit \ Assert + (Collectable.Aef[c] - Random)
     with Collectable[c] where Collectable.Elm[c] ~ Int32 = region local {
         let f = () ->
             ListSetGenerator.randomIterator(local, tests) |>
                 Iterator.forEach(prop);
-        let g = () -> runCrash(f);
-        Random.runWithSeed(seed, g)
+        Random.runWithSeed(seed, f)
     }
 
-    @test
-    pub def testEmpty(): Bool \ IO = {
+    @Test
+    pub def testEmpty(): Unit \ Assert = {
         def prop(l) = {
             let expectedLength = List.isEmpty(l);
             let s = ListSet.fromIterable(l);
-            ListSet.isEmpty(s) |> assertExpect(expect = expectedLength)
+            ListSet.isEmpty(s) |> Assert.assertEq(expected = expectedLength)
         };
         prop |> runTest(100, 8168590i64)
     }
 
-    @test
-    pub def testSize(): Bool \ IO = {
+    @Test
+    pub def testSize(): Unit \ Assert = {
         def prop(l) = {
             let expectedLength = List.length(l);
             let s = ListSet.fromIterable(l);
-            ListSet.size(s) |> assertExpect(expect = expectedLength)
+            ListSet.size(s) |> Assert.assertEq(expected = expectedLength)
         };
         prop |> runTest(10_000, 578956838i64)
     }
 
-    @test
-    pub def testInsertRedundant(): Bool \ IO = {
+    @Test
+    pub def testInsertRedundant(): Unit \ Assert = {
         def prop(l) = {
             let s1 = ListSet.fromIterable(l);
             let s2 = l |>
                 List.head |>
                 Option.map(hd -> ListSet.insert(hd, s1)) |>
                 Option.getWithDefault(s1);
-            assertExpect(expect = s1, s2)
+            Assert.assertEq(expected = s1, s2)
         };
         prop |> runTest(1_000, -6859625i64)
     }
