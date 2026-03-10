@@ -19,6 +19,7 @@ mod JonathanStarup.Test.Property.TestListSet {
     use JonathanStarup.Test.Property.ListSetGenerator
     use Abort.abort
     use Formattable.format
+    use Math.Random
 
     def runTest(
         tests: Int32, seed: Int64, prop: c -> Unit \ Assert

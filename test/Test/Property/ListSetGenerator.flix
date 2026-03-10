@@ -17,6 +17,7 @@
 mod JonathanStarup.Test.Property.ListSetGenerator {
     use Collectable.collect
     use JonathanStarup.ListSet
+    use Math.Random
     use Result.Err
     use Result.Ok
 
@@ -33,7 +34,7 @@ mod JonathanStarup.Test.Property.ListSetGenerator {
             if (get(runningLength) <= 0) None
             else {
                 runningLength |> transform(Sub.sub(1));
-                Some(Random.randomInt32())
+                Some(randomInt32())
             }
         })
 
@@ -71,6 +72,9 @@ mod JonathanStarup.Test.Property.ListSetGenerator {
     }
 
     def nextNatWithMax(max: Int32): Int32 \ Random = {
-        Int32.modulo(Random.randomInt32(), Int32.max(max, 1))
+        Int32.modulo(randomInt32(), Int32.max(max, 1))
     }
+
+    def randomInt32(): Int32 \ Random =
+        Int64.clampToInt32(min = Int32.minValue(), max = Int32.maxValue(), Int64.rightShift(Random.randomInt64(), 32))
 }
