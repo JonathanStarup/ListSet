@@ -30,7 +30,7 @@ mod JonathanStarup.Test.Property.ListSetGenerator {
     def fromLengthIterator(rc: Region[r], length: Int32): Iterator[Int32, r + Random, r] \ r =
         use Ref.{fresh, get, transform};
         let runningLength = fresh(rc, length);
-        Iterator.iterate(rc, () -> {
+        Iterator.unfoldWithIter(rc, () -> {
             if (get(runningLength) <= 0) None
             else {
                 runningLength |> transform(Sub.sub(1));
@@ -50,7 +50,7 @@ mod JonathanStarup.Test.Property.ListSetGenerator {
         use Ref.{fresh, get, transform};
         let runningAmount = fresh(rc, amount);
         let runningLen = fresh(rc, 2);
-        let iter = Iterator.iterate(rc)(() -> {
+        let iter = Iterator.unfoldWithIter(rc)(() -> {
             if (get(runningAmount) <= 0) None
             else {
                 runningAmount |> transform(x -> x - 1);
