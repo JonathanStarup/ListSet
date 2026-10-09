@@ -1,6 +1,4 @@
 [package]
-name        = "ListSet"
-description = "A set that just requires equality."
-version     = "0.5.0"
-flix        = "0.53.0"
-authors     = ["Jonathan Lindegaard Starup"]
+version    = "0.5.0"
+flix       = "0.53.0"
+repository = "github:JonathanStarup/ListSet"
